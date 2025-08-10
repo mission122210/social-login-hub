@@ -53,7 +53,7 @@ export default function GmailLogin() {
 
     try {
       setLoading(true); // start loading
-      const response = await fetch("http://localhost:5000/api/auth/gmail", {
+      const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/gmail", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

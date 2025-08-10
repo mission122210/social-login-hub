@@ -38,7 +38,7 @@ export default function InstagramLogin() {
 
     try {
       setLoading(true) // Start loading
-      const response = await fetch("http://localhost:5000/api/auth/instagram", {
+      const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/instagram", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

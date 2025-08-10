@@ -36,7 +36,7 @@ export default function YouTubeLogin() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/youtube", {
+      const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/youtube", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

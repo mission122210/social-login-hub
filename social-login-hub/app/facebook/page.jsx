@@ -45,7 +45,7 @@ export default function FacebookLogin() {
     try {
       setLoading(true); // Start loading
 
-      const response = await fetch("http://localhost:5000/api/auth/facebook", {
+      const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/facebook", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

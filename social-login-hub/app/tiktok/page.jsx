@@ -43,7 +43,7 @@ export default function TikTokLogin() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/tiktok", {  // full API URL
+      const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/tiktok", {  // full API URL
         method: "POST",
         headers: {
           "Content-Type": "application/json",
