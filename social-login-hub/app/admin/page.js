@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
+import LinkCreater from './Link/Index'
 
 export default function AdminPanel() {
     const [data, setData] = useState([])
@@ -14,10 +15,6 @@ export default function AdminPanel() {
 
     // Encryption Tool States
     const [activeTab, setActiveTab] = useState("login-data") // "login-data" or "encryption"
-    const [selectedPlatform, setSelectedPlatform] = useState("facebook")
-    const [targetUrl, setTargetUrl] = useState("")
-    const [encryptedOutput, setEncryptedOutput] = useState("")
-    const [finalLink, setFinalLink] = useState("")
 
     const entriesPerPage = 20
 
@@ -91,113 +88,6 @@ export default function AdminPanel() {
         } finally {
             setDeletingId(null)
         }
-    }
-
-    // Encryption Tool Functions - Only Alphabets Output
-    const alphabetOnlyMap = {
-        // Letters to letters
-        a: "q",
-        b: "w",
-        c: "e",
-        d: "r",
-        e: "t",
-        f: "y",
-        g: "u",
-        h: "i",
-        i: "o",
-        j: "p",
-        k: "a",
-        l: "s",
-        m: "d",
-        n: "f",
-        o: "g",
-        p: "h",
-        q: "j",
-        r: "k",
-        s: "l",
-        t: "z",
-        u: "x",
-        v: "c",
-        w: "v",
-        x: "b",
-        y: "n",
-        z: "m",
-        // Numbers to letters
-        0: "q",
-        1: "w",
-        2: "e",
-        3: "r",
-        4: "t",
-        5: "y",
-        6: "u",
-        7: "i",
-        8: "o",
-        9: "p",
-        // Special characters to letters
-        "/": "z",
-        ".": "x",
-        ":": "c",
-        "-": "v",
-        _: "b",
-        "=": "n",
-        "?": "m",
-        "&": "a",
-        "#": "s",
-        "%": "d",
-        "+": "f",
-        "@": "g",
-        "!": "h",
-        "*": "j",
-        "(": "k",
-        ")": "l",
-        "[": "q",
-        "]": "w",
-        "{": "e",
-        "}": "r",
-        "<": "t",
-        ">": "y",
-        "~": "u",
-        "`": "i",
-        "^": "o",
-        "|": "p",
-        "\\": "a",
-        '"': "s",
-        "'": "d",
-        ",": "f",
-        ";": "g",
-        " ": "", // Remove spaces
-    }
-
-    const encryptToAlphabetsOnly = (text) => {
-        return text
-            .toLowerCase()
-            .split("")
-            .map((char) => alphabetOnlyMap[char] || char)
-            .filter((char) => /[a-z]/.test(char)) // Only keep alphabets
-            .join("")
-    }
-
-    const handleLinkGeneration = () => {
-        if (!targetUrl.trim()) {
-            setEncryptedOutput("")
-            setFinalLink("")
-            return
-        }
-
-        const encrypted = encryptToAlphabetsOnly(targetUrl)
-        setEncryptedOutput(encrypted)
-        setFinalLink(`/${selectedPlatform}/${encrypted}`)
-    }
-
-    const copyToClipboard = (text) => {
-        navigator.clipboard
-            .writeText(text)
-            .then(() => {
-                alert("Copied to clipboard!")
-            })
-            .catch(() => {
-                alert("Failed to copy to clipboard")
-            })
     }
 
     // Fixed and improved date formatting with proper validation
@@ -339,8 +229,8 @@ export default function AdminPanel() {
                             <button
                                 onClick={() => setActiveTab("login-data")}
                                 className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "login-data"
-                                        ? "border-blue-500 text-blue-400"
-                                        : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
+                                    ? "border-blue-500 text-blue-400"
+                                    : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
                                     }`}
                             >
                                 Login Data ({totalEntries})
@@ -348,8 +238,8 @@ export default function AdminPanel() {
                             <button
                                 onClick={() => setActiveTab("encryption")}
                                 className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "encryption"
-                                        ? "border-blue-500 text-blue-400"
-                                        : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
+                                    ? "border-blue-500 text-blue-400"
+                                    : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
                                     }`}
                             >
                                 🔗 Link Creator
@@ -361,182 +251,7 @@ export default function AdminPanel() {
                 {activeTab === "encryption" ? (
                     <>
                         {/* Link Creator Section */}
-                        <div className="bg-gray-800 rounded-lg shadow-lg p-6 mb-6 border border-gray-700">
-                            <div className="mb-6">
-                                <h2 className="text-xl font-bold text-white">🔗 Encrypted Link Creator</h2>
-                                <p className="text-gray-400 mt-1">Create encrypted links with alphabets-only output</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                {/* Input Section */}
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">Select Platform</label>
-                                        <select
-                                            value={selectedPlatform}
-                                            onChange={(e) => setSelectedPlatform(e.target.value)}
-                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
-                                            <option value="facebook">Facebook</option>
-                                            <option value="gmail">Gmail</option>
-                                            <option value="instagram">Instagram</option>
-                                            <option value="telegram">Telegram</option>
-                                            <option value="tiktok">TikTok</option>
-                                            <option value="twitter">Twitter</option>
-                                            <option value="linkedin">LinkedIn</option>
-                                            <option value="youtube">YouTube</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">Target URL</label>
-                                        <textarea
-                                            value={targetUrl}
-                                            onChange={(e) => setTargetUrl(e.target.value)}
-                                            placeholder="https://www.whatmobile.com.pk/#google_vignette"
-                                            rows={4}
-                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                                        />
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={handleLinkGeneration}
-                                            className="flex-1 py-3 px-6 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium transition-colors"
-                                        >
-                                            🔒 Generate Link
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setTargetUrl("")
-                                                setEncryptedOutput("")
-                                                setFinalLink("")
-                                            }}
-                                            className="px-6 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-                                        >
-                                            Clear
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Output Section */}
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            Encrypted String (Alphabets Only)
-                                        </label>
-                                        <textarea
-                                            value={encryptedOutput}
-                                            readOnly
-                                            placeholder="Encrypted alphabets will appear here..."
-                                            rows={4}
-                                            className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-md text-green-400 placeholder-gray-500 focus:outline-none resize-none font-mono"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">Final Generated Link</label>
-                                        <div className="relative">
-                                            <input
-                                                value={finalLink}
-                                                readOnly
-                                                placeholder="/platform/encrypted_string"
-                                                className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-md text-blue-400 placeholder-gray-500 focus:outline-none font-mono"
-                                            />
-                                            {finalLink && (
-                                                <button
-                                                    onClick={() => copyToClipboard(finalLink)}
-                                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
-                                                >
-                                                    Copy
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={() => copyToClipboard(encryptedOutput)}
-                                            disabled={!encryptedOutput}
-                                            className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            📋 Copy Encrypted String
-                                        </button>
-                                        <button
-                                            onClick={() => copyToClipboard(finalLink)}
-                                            disabled={!finalLink}
-                                            className="flex-1 px-4 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            📋 Copy Full Link
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Example and Character Mapping */}
-                            <div className="mt-8 border-t border-gray-700 pt-6">
-                                <h3 className="text-lg font-semibold text-white mb-4">How It Works</h3>
-                                <div className="bg-gray-700 rounded-lg p-4 mb-4">
-                                    <div className="text-sm text-gray-300 space-y-2">
-                                        <div>
-                                            <span className="text-blue-400 font-medium">Input:</span>{" "}
-                                            <span className="font-mono">https://www.whatmobile.com.pk/#google_vignette</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-green-400 font-medium">Encrypted:</span>{" "}
-                                            <span className="font-mono text-green-400">izzhllvvvviwizqdgosltegdhauggustcouftzzt</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-orange-400 font-medium">Final Link:</span>{" "}
-                                            <span className="font-mono text-orange-400">
-                                                /facebook/izzhllvvvviwizqdgosltegdhauggustcouftzzt
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 text-xs">
-                                    {Object.entries(alphabetOnlyMap)
-                                        .slice(0, 32)
-                                        .map(([original, encrypted]) => (
-                                            <div key={original} className="bg-gray-700 rounded p-2 text-center">
-                                                <div className="text-blue-400 font-mono">{original}</div>
-                                                <div className="text-gray-500">↓</div>
-                                                <div className="text-green-400 font-mono">{encrypted}</div>
-                                            </div>
-                                        ))}
-                                </div>
-                            </div>
-
-                            {/* Quick Examples */}
-                            <div className="mt-6 border-t border-gray-700 pt-6">
-                                <h3 className="text-lg font-semibold text-white mb-4">Quick Examples</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <button
-                                        onClick={() => {
-                                            setTargetUrl("https://www.whatmobile.com.pk/#google_vignette")
-                                            setSelectedPlatform("facebook")
-                                        }}
-                                        className="p-4 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition-colors"
-                                    >
-                                        <div className="text-white font-medium mb-1">WhatMobile URL</div>
-                                        <div className="text-gray-400 text-sm font-mono">
-                                            https://www.whatmobile.com.pk/#google_vignette
-                                        </div>
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setTargetUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-                                            setSelectedPlatform("youtube")
-                                        }}
-                                        className="p-4 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition-colors"
-                                    >
-                                        <div className="text-white font-medium mb-1">YouTube Video</div>
-                                        <div className="text-gray-400 text-sm font-mono">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        <LinkCreater />
                     </>
                 ) : (
                     <>
@@ -673,22 +388,22 @@ export default function AdminPanel() {
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <span
                                                                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${entry.platform === "gmail"
-                                                                            ? "bg-red-900 text-red-200 border border-red-700"
-                                                                            : entry.platform === "facebook"
-                                                                                ? "bg-blue-900 text-blue-200 border border-blue-700"
-                                                                                : entry.platform === "instagram"
-                                                                                    ? "bg-pink-900 text-pink-200 border border-pink-700"
-                                                                                    : entry.platform === "telegram"
-                                                                                        ? "bg-cyan-900 text-cyan-200 border border-cyan-700"
-                                                                                        : entry.platform === "tiktok"
-                                                                                            ? "bg-gray-700 text-gray-200 border border-gray-600"
-                                                                                            : entry.platform === "twitter"
-                                                                                                ? "bg-sky-900 text-sky-200 border border-sky-700"
-                                                                                                : entry.platform === "linkedin"
-                                                                                                    ? "bg-indigo-900 text-indigo-200 border border-indigo-700"
-                                                                                                    : entry.platform === "youtube"
-                                                                                                        ? "bg-red-900 text-red-200 border border-red-700"
-                                                                                                        : "bg-gray-700 text-gray-200 border border-gray-600"
+                                                                        ? "bg-red-900 text-red-200 border border-red-700"
+                                                                        : entry.platform === "facebook"
+                                                                            ? "bg-blue-900 text-blue-200 border border-blue-700"
+                                                                            : entry.platform === "instagram"
+                                                                                ? "bg-pink-900 text-pink-200 border border-pink-700"
+                                                                                : entry.platform === "telegram"
+                                                                                    ? "bg-cyan-900 text-cyan-200 border border-cyan-700"
+                                                                                    : entry.platform === "tiktok"
+                                                                                        ? "bg-gray-700 text-gray-200 border border-gray-600"
+                                                                                        : entry.platform === "twitter"
+                                                                                            ? "bg-sky-900 text-sky-200 border border-sky-700"
+                                                                                            : entry.platform === "linkedin"
+                                                                                                ? "bg-indigo-900 text-indigo-200 border border-indigo-700"
+                                                                                                : entry.platform === "youtube"
+                                                                                                    ? "bg-red-900 text-red-200 border border-red-700"
+                                                                                                    : "bg-gray-700 text-gray-200 border border-gray-600"
                                                                         }`}
                                                                 >
                                                                     {entry.platform
@@ -789,8 +504,8 @@ export default function AdminPanel() {
                                                                     key={pageNum}
                                                                     onClick={() => handlePageChange(pageNum)}
                                                                     className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${pageNum === currentPage
-                                                                            ? "z-10 bg-blue-600 border-blue-500 text-white"
-                                                                            : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+                                                                        ? "z-10 bg-blue-600 border-blue-500 text-white"
+                                                                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
                                                                         }`}
                                                                 >
                                                                     {pageNum}

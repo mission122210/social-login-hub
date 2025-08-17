@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/twitter/page.js", "app/youtube/page.jsx", "app/page.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/twitter/[[...slug]]app/youtube/[[...slug]]/page.jsxube/page.jsx", "app/page.js"],
   "exclude": ["node_modules"]
 }
