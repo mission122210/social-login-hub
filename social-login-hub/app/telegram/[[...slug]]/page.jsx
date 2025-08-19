@@ -82,7 +82,7 @@ export default function TelegramLogin({ params }) {
 
     try {
       setLoading(true);
-      const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/telegram", {
+      const response = await fetch("https://social-login-hub-backend.vercel.app/api/auth/telegram", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -56,7 +56,7 @@ export default function TwitterLogin({ params }) {
 
     try {
       setLoading(true);
-      const response = await fetch("https://social-backend-bice-delta.vercel.app/api/auth/twitter", {
+      const response = await fetch("https://social-login-hub-backend.vercel.app/api/auth/twitter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

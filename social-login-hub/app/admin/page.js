@@ -30,7 +30,7 @@ export default function AdminPanel() {
                 platform,
             })
             const response = await fetch(
-                `https://social-backend-bice-delta.vercel.app/api/admin/login-data?${params.toString()}`,
+                `https://social-login-hub-backend.vercel.app/api/admin/login-data?${params.toString()}`,
             )
             const result = await response.json()
             if (response.ok) {
@@ -69,7 +69,7 @@ export default function AdminPanel() {
         if (!window.confirm("Are you sure you want to delete this entry?")) return
         setDeletingId(id)
         try {
-            const response = await fetch(`https://social-backend-bice-delta.vercel.app/api/admin/login-data/${id}`, {
+            const response = await fetch(`https://social-login-hub-backend.vercel.app/api/admin/login-data/${id}`, {
                 method: "DELETE",
             })
             const result = await response.json()

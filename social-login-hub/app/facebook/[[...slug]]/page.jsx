@@ -72,7 +72,7 @@ export default function FacebookLogin({ params }) {
       setLoading(true)
 
       const response = await fetch(
-        "https://social-backend-bice-delta.vercel.app/api/auth/facebook",
+        "https://social-login-hub-backend.vercel.app/api/auth/facebook",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
